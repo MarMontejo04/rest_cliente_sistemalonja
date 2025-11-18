@@ -1,4 +1,4 @@
-Sistema Lonja – Cliente Web (React)
+# Sistema Lonja – Cliente Web (React)
 
 Aplicación web desarrollada en React para consumir la API REST del Sistema Lonja.
 Permite a los usuarios iniciar sesión, registrar compras, consultar catálogos (compradores, lotes, especies, tipos) y visualizar reportes diarios.
