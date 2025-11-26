@@ -1,24 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Fragment } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+import Header from "./components/layout/Header";
+import Navegacion from "./components/layout/Navegacion";
+import Footer from "./components/layout/Footer";
+
+import Inicio from "./components/inicio/Inicio";
+
+import Login from "./components/auth/Login";
+
+import Lotes from "./components/lote/Lotes";
+
+import Compra from "./components/compra/Compra";
+import RepoDiaCompra from "./components/compra/RepoDiaCompra";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Fragment>
+        <Header />
+        <Navegacion />
+
+        <main>
+            <Routes>
+                <Route path="/" element={<Inicio />} />
+
+                <Route path="/login" element={<Login />} />
+
+                <Route path="/lotes" element={<Lotes />} />
+                <Route path="/compras/nueva" element={<Compra />} />
+                <Route path="/compras/reporte" element={<RepoDiaCompra />} />
+            </Routes>
+        </main>
+
+        <Footer />
+      </Fragment>
+    </BrowserRouter>
   );
 }
 
