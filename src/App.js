@@ -10,9 +10,11 @@ import Inicio from "./components/inicio/Inicio";
 import Login from "./components/auth/Login";
 
 import Lotes from "./components/lote/Lotes";
+import NuevoLote from "./components/lote/NuevoLote";
 
 import Compra from "./components/compra/Compra";
-import RepoDiaCompra from "./components/compra/RepoDiaCompra";
+import ReporteDiario from "./components/compra/ReporteDiario";
+import ReciboVenta from "./components/compra/ReciboVenta";
 
 function App() {
   return (
@@ -28,8 +30,11 @@ function App() {
                 <Route path="/login" element={<Login />} />
 
                 <Route path="/lotes" element={<Lotes />} />
+                <Route path='/lotes/nuevo' element={<NuevoLote />} />
+
                 <Route path="/compras/nueva" element={<Compra />} />
-                <Route path="/compras/reporte" element={<RepoDiaCompra />} />
+                <Route path="/compras/reporte" element={<ReporteDiario />} />
+                <Route path="/compras/recibo/:id" element={<ReciboVenta />} />
             </Routes>
         </main>
 
