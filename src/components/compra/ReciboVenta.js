@@ -4,7 +4,6 @@ import { Link, useParams } from 'react-router-dom';
 const ReciboVenta = () => {
     const { id } = useParams(); 
 
-    // DATOS SIMULADOS
     const venta = {
         folio: id || 'V-999',
         fecha: new Date().toLocaleDateString(),
@@ -17,13 +16,11 @@ const ReciboVenta = () => {
     };
 
     return (
-        // Contenedor principal con altura mínima y centrado
         <div className="container-fluid p-0 d-flex align-items-center justify-content-center bg-animated" style={{minHeight: '100vh'}}>
             
-            <div className="container py-4"> {/* py-4 para dar un poco de aire arriba y abajo */}
-                <div className="row justify-content-center align-items-center"> {/* Centrado vertical y horizontal */}
+            <div className="container py-4"> 
+                <div className="row justify-content-center align-items-center"> 
                     
-                    {/* COLUMNA DEL RECIBO */}
                     <div className="col-md-6 col-lg-5 mb-4 mb-md-0">
                         <div className="card border-0 shadow-lg" style={{backgroundColor: '#FFF', color: '#000', borderRadius: '0'}}>
                             
@@ -42,7 +39,7 @@ const ReciboVenta = () => {
                                     <p className="text-muted small mb-0">Folio: <span className="fw-bold text-dark">{venta.folio}</span></p>
                                 </div>
 
-                                <div className="small"> {/* Reducimos un poco el tamaño general del texto del detalle */}
+                                <div className="small"> 
                                     <div className="row mb-1">
                                         <div className="col-6 text-muted text-uppercase">Fecha</div>
                                         <div className="col-6 text-end fw-bold">{venta.fecha} {venta.hora}</div>
@@ -89,7 +86,6 @@ const ReciboVenta = () => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DE ACCIONES (BOTONES) */}
                     <div className="col-md-5 col-lg-4 ps-md-5">
                         <div className="d-flex flex-column gap-3">
                             

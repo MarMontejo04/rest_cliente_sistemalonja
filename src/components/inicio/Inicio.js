@@ -8,11 +8,11 @@ const Inicio = () => {
             <div 
                 className="d-flex align-items-center justify-content-center text-center"
                 style={{
-                    minHeight: '80svh', // Pantalla completa
+                    minHeight: '80vh',
                     background: 'linear-gradient(rgba(2, 30, 38, 0.5), rgba(2, 30, 38, 0.5)), url("/img/fondo.png")',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    backgroundAttachment: 'fixed', // Parallax
+                    backgroundAttachment: 'fixed',
                     position: 'relative'
                 }}
             >

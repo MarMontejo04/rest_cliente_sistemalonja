@@ -7,7 +7,6 @@ const CompraPescadoAzul = () => {
 
     const PRECIO_CAJA = 30; 
 
-    // 1. DATOS DUMMY (PESCADO AZUL)
     const [inventario] = useState([
         { 
             _id: 'A1', 
@@ -38,7 +37,6 @@ const CompraPescadoAzul = () => {
         },
     ]);
 
-    // Fondo inicial temático
     const [imagenFondo, setImagenFondo] = useState('/img/fondoAzul.jpg'); 
     
     const [compra, guardarCompra] = useState({
@@ -114,7 +112,7 @@ const CompraPescadoAzul = () => {
                     top: 0,
                     left: 0,
                     width: '100%',
-                    height: '80vh', // <--- AJUSTE CLAVE
+                    height: '80vh',
                     backgroundImage: `linear-gradient(to right, rgba(2, 30, 38, 0.95) 0%, rgba(2, 30, 38, 0.85) 40%, rgba(2, 30, 38, 0.4) 100%), url("${imagenFondo}")`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
@@ -124,11 +122,9 @@ const CompraPescadoAzul = () => {
                 }}
             ></div>
 
-            {/* CONTENIDO PRINCIPAL */}
             <div className="container position-relative" style={{zIndex: 2, minHeight: '80vh', paddingTop: '5vh'}}>
                 <div className="row h-100 align-items-center justify-content-between">
                     
-                    {/* COLUMNA IZQUIERDA */}
                     <div className="col-lg-5 mb-5 mb-lg-0 text-white animate__animated animate__fadeInLeft">
                         <h4 className="text-gold text-uppercase letter-spacing-2 mb-4" style={{borderBottom: '2px solid var(--oro-oscuro)', display: 'inline-block', paddingBottom: '10px'}}>
                             <i className="fas fa-water me-2"></i> Pescado Azul
@@ -164,7 +160,6 @@ const CompraPescadoAzul = () => {
                         )}
                     </div>
 
-                    {/* COLUMNA DERECHA */}
                     <div className="col-lg-6 animate__animated animate__fadeInRight">
                         <div className="card-premium shadow-lg border-gold" style={{background: 'rgba(4, 43, 53, 0.95)'}}>
                             <div className="card-body p-4 p-xl-5">
@@ -222,7 +217,6 @@ const CompraPescadoAzul = () => {
                 </div>
             </div>
 
-            {/* SECCIÓN INFO */}
             <section className="py-5 bg-animated" style={{borderTop: '4px solid var(--oro-principal)', position: 'relative', zIndex: 2}}>
                 <div className="container text-center">
                     <div className="row justify-content-center mb-5">

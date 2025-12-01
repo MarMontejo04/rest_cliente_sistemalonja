@@ -12,7 +12,6 @@ const ReporteDiario = () => {
     });
 
     useEffect(() => {
-        // DATOS SIMULADOS (Aquí iría tu llamada a la API)
         const datosSimulados = [
             { 
                 _id: 'V-101', 
@@ -52,11 +51,9 @@ const ReporteDiario = () => {
             },
         ];
 
-        // Filtro por fecha (simulado)
         const ventasDelDia = fechaSeleccionada === fechaHoy ? datosSimulados : [];
         setVentas(ventasDelDia);
 
-        // Calcular totales
         const totalDinero = ventasDelDia.reduce((acc, curr) => acc + curr.total, 0);
         const totalKilos = ventasDelDia.reduce((acc, curr) => acc + curr.kilos, 0);
         
@@ -114,7 +111,6 @@ const ReporteDiario = () => {
                         </div>
                     </div>
 
-                    {/* KPI 2: VOLUMEN */}
                     <div className="col-md-4">
                         <div className="p-4 rounded h-100 position-relative overflow-hidden" 
                              style={{background: 'linear-gradient(135deg, #042B35 0%, #021E26 100%)', border: '1px solid var(--oro-oscuro)'}}>
@@ -133,7 +129,6 @@ const ReporteDiario = () => {
                         </div>
                     </div>
 
-                    {/* KPI 3: TRANSACCIONES */}
                     <div className="col-md-4">
                         <div className="p-4 rounded h-100 position-relative overflow-hidden" 
                              style={{background: 'linear-gradient(135deg, #042B35 0%, #021E26 100%)', border: '1px solid var(--oro-oscuro)'}}>
@@ -153,7 +148,6 @@ const ReporteDiario = () => {
                     </div>
                 </div>
 
-                {/* TABLA DE DETALLE DE VENTAS */}
                 <div className="card border-0 shadow-lg bg-transparent">
                     <div className="card-header bg-transparent text-start border-0 px-0">
                         <h3 className="text-white mb-0" style={{fontFamily: "'Cinzel', serif"}}>Bitácora de Transacciones</h3>
