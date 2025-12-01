@@ -19,6 +19,7 @@ import CompraPsemigraso from "./components/compra/CompraPsemigraso.js";
 
 import ReporteDiario from "./components/compra/ReporteDiario";
 import ReciboVenta from "./components/compra/ReciboVenta";
+import NuevoVendedor from './components/auth/NuevoVendedor.js';
 
 function App() {
   return (
@@ -31,10 +32,12 @@ function App() {
                 <Route path="/" element={<Inicio />} />
 
                 <Route path="/login" element={<Login />} />
+                <Route path="/nuevoVendedor" element={<NuevoVendedor />} />
+
 
                 <Route path="/lotes" element={<Lotes />} />
                 <Route path='/lotes/nuevo' element={<NuevoLote />} />
-                <Route path='/lotes/editar' element={<EditarLote />} />
+                <Route path='/lotes/editar/:id' element={<EditarLote />} />
 
                 <Route path="/compras/marisco" element={<CompraMarisco/>} />
                 <Route path="/compras/azul" element={<CompraPazul/>} />

@@ -54,7 +54,7 @@ const Lotes = () => {
             to="/lotes/nuevo"
             className="btn btn-symbol-primary shadow-lg px-4 py-2"
           >
-            <span className="me-2">+</span> Registrar Entrada
+            <span className="me-2">+</span> Registrar Lote
           </Link>
         </div>
 
@@ -176,7 +176,7 @@ const Lotes = () => {
                           )}
 
                           <Link
-                            to={`/lotes/editar/${lote._id}`}
+                            to={`/lotes/editar/${lotes._id}`}
                             className="btn btn-sm btn-outline-warning px-3 d-flex align-items-center gap-2"
                             style={{
                               borderColor: "var(--oro-oscuro)",
