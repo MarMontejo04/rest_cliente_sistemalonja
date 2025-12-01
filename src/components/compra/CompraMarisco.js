@@ -2,47 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-const CompraPescadoBlanco = () => {
+const CompraMarisco = () => {
     const navigate = useNavigate();
     const PRECIO_CAJA = 30; 
 
-    // 1. DATOS DUMMY (PESCADO BLANCO)
+    // 1. DATOS DUMMY (Mariscos)
     const [inventario] = useState([
-        { 
-            _id: 'B1', 
-            especie: 'Huachinango', 
-            tipo: 'Primera', 
-            precio: 120, 
-            disponible: 50.0, 
-            cajas: 2, 
-            imagen: 'https://images.unsplash.com/photo-1517649281203-dad836b446d2?q=80&w=1000&auto=format&fit=crop' 
-        },
-        { 
-            _id: 'B2', 
-            especie: 'Robalo', 
-            tipo: 'Mediano', 
-            precio: 150, 
-            disponible: 20.0, 
-            cajas: 1, 
-            imagen: 'https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?q=80&w=1000&auto=format&fit=crop' 
-        },
-        { 
-            _id: 'B3', 
-            especie: 'Sierra', 
-            tipo: 'Chica', 
-            precio: 80, 
-            disponible: 100.0, 
-            cajas: 5, 
-            imagen: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?q=80&w=1000&auto=format&fit=crop' 
-        },
+        { _id: 'M1', especie: 'Camarón', tipo: 'Jumbo', precio: 250, disponible: 30.5, cajas: 3, imagen: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?q=80&w=1000&auto=format&fit=crop' },
+        { _id: 'M2', especie: 'Camarón', tipo: 'Pacotilla', precio: 180, disponible: 50.0, cajas: 5, imagen: 'https://images.unsplash.com/photo-1623962540777-27b3b0205106?q=80&w=1000&auto=format&fit=crop' },
+        { _id: 'M3', especie: 'Pulpo', tipo: 'Grande', precio: 220, disponible: 15.0, cajas: 1, imagen: 'https://images.unsplash.com/photo-1545688562-b5a29454e759?q=80&w=1000&auto=format&fit=crop' },
+        { _id: 'M4', especie: 'Jaiba', tipo: 'Entera', precio: 90, disponible: 40.0, cajas: 2, imagen: 'https://images.unsplash.com/photo-1539683255143-73a6b838b106?q=80&w=1000&auto=format&fit=crop' },
     ]);
 
-    const [imagenFondo, setImagenFondo] = useState('https://images.unsplash.com/photo-1580910530099-e55c327801f6?q=80&w=1000&auto=format&fit=crop'); // Fondo inicial
+    const [imagenFondo, setImagenFondo] = useState('https://images.unsplash.com/photo-1615141982880-1313d87a7409?q=80&w=2070&auto=format&fit=crop');
     
     const [compra, guardarCompra] = useState({
-        // Datos Cliente
         nombre_cliente: '', apellido_paterno: '', apellido_materno: '', direccion: '', correo: '',
-        // Datos Venta
         id_lote: '', kilos: '', cajas: 0, precio_kilo: '', 
         total_pescado: 0, total_cajas: 0, gran_total: 0,
         especieNombre: '', especieTipo: ''
@@ -51,21 +26,15 @@ const CompraPescadoBlanco = () => {
     const seleccionarLote = (e) => {
         const idLote = e.target.value;
         const loteEncontrado = inventario.find(l => l._id === idLote);
-
         if (loteEncontrado) {
             guardarCompra(prev => ({
-                ...prev,
-                id_lote: idLote,
-                kilos: loteEncontrado.disponible, 
-                cajas: loteEncontrado.cajas,
-                precio_kilo: loteEncontrado.precio,
-                especieNombre: loteEncontrado.especie,
-                especieTipo: loteEncontrado.tipo
+                ...prev, id_lote: idLote, kilos: loteEncontrado.disponible, cajas: loteEncontrado.cajas, precio_kilo: loteEncontrado.precio,
+                especieNombre: loteEncontrado.especie, especieTipo: loteEncontrado.tipo
             }));
             setImagenFondo(loteEncontrado.imagen);
         } else {
             guardarCompra(prev => ({ ...prev, id_lote: '', kilos: '', cajas: 0, precio_kilo: '', especieNombre: '', especieTipo: '', total_pescado: 0, total_cajas: 0, gran_total: 0 }));
-            setImagenFondo('https://images.unsplash.com/photo-1580910530099-e55c327801f6?q=80&w=1000&auto=format&fit=crop'); 
+            setImagenFondo('https://images.unsplash.com/photo-1615141982880-1313d87a7409?q=80&w=2070&auto=format&fit=crop'); 
         }
     }
 
@@ -75,19 +44,11 @@ const CompraPescadoBlanco = () => {
             const costoPescado = parseFloat(kilos) * parseFloat(precio_kilo);
             const costoEnvases = parseFloat(cajas) * PRECIO_CAJA;
             const totalFinal = costoPescado + costoEnvases;
-
-            guardarCompra(prev => ({ 
-                ...prev, 
-                total_pescado: costoPescado.toFixed(2),
-                total_cajas: costoEnvases.toFixed(2),
-                gran_total: totalFinal.toFixed(2) 
-            }));
+            guardarCompra(prev => ({ ...prev, total_pescado: costoPescado.toFixed(2), total_cajas: costoEnvases.toFixed(2), gran_total: totalFinal.toFixed(2) }));
         }
     }, [compra.kilos, compra.cajas, compra.precio_kilo]);
 
-    const actualizarState = e => {
-        guardarCompra({ ...compra, [e.target.name]: e.target.value });
-    }
+    const actualizarState = e => { guardarCompra({ ...compra, [e.target.name]: e.target.value }); }
 
     const procesarVenta = e => {
         e.preventDefault();
@@ -96,35 +57,21 @@ const CompraPescadoBlanco = () => {
             return;
         }
         Swal.fire({ title: 'Venta Exitosa', text: `Total: $${compra.gran_total}`, icon: 'success', confirmButtonColor: 'var(--oro-principal)', background: '#042B35', color: '#F0F0F0' })
-        .then(() => { navigate('/compras/recibo/V-BLANCO'); });
+        .then(() => { navigate('/compras/recibo/V-MARISCO'); });
     }
 
     return (
-        <div className="container-fluid p-0 position-relative" style={{backgroundColor: 'var(--color-fondo)'}}>
+        <div className="container-fluid p-0 bg-animated" style={{minHeight: '100vh'}}>
+            {/* IMAGEN DE FONDO PARALLAX */}
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 0, backgroundImage: `linear-gradient(to right, rgba(2, 30, 38, 0.95), rgba(2, 30, 38, 0.85) 40%, rgba(2, 30, 38, 0.4) 100%), url("${imagenFondo}")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed', transition: 'background-image 0.6s ease-in-out' }}></div>
             
-            <div 
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '80vh', // 80% Altura
-                    backgroundImage: `linear-gradient(to right, rgba(2, 30, 38, 0.95) 0%, rgba(2, 30, 38, 0.85) 40%, rgba(2, 30, 38, 0.4) 100%), url("${imagenFondo}")`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    transition: 'background-image 0.6s ease-in-out',
-                    backgroundAttachment: 'fixed',
-                    zIndex: 0
-                }}
-            ></div>
-
             <div className="container position-relative" style={{zIndex: 2, minHeight: '80vh', paddingTop: '5vh', paddingBottom: '5vh'}}>
                 <div className="row h-100 align-items-center justify-content-between">
                     
-                    {/* COLUMNA IZQUIERDA */}
+                    {/* COLUMNA IZQUIERDA: INFO VISUAL */}
                     <div className="col-lg-5 mb-5 mb-lg-0 text-white animate__animated animate__fadeInLeft">
                         <h4 className="text-gold text-uppercase letter-spacing-2 mb-4" style={{borderBottom: '2px solid var(--oro-oscuro)', display: 'inline-block', paddingBottom: '10px'}}>
-                            <i className="fas fa-fish me-2"></i> Pescado Blanco
+                            <i className="fas fa-utensils me-2"></i> Mariscos y Crustáceos
                         </h4>
                         
                         {compra.id_lote ? (
@@ -157,12 +104,12 @@ const CompraPescadoBlanco = () => {
                         ) : (
                             <div>
                                 <h1 className="display-3 fw-bold mb-4" style={{fontFamily: "'Playfair Display', serif"}}>Seleccione su Producto</h1>
-                                <p className="lead text-white-50 fs-4">Calidad premium en pescado blanco de temporada.</p>
+                                <p className="lead text-white-50 fs-4">Explore nuestro inventario fresco disponible para comenzar la venta del día.</p>
                             </div>
                         )}
                     </div>
 
-                    {/* COLUMNA DERECHA */}
+                    {/* COLUMNA DERECHA: FORMULARIO COMPLETO */}
                     <div className="col-lg-6 animate__animated animate__fadeInRight">
                         <div className="card-premium shadow-lg border-gold" style={{background: 'rgba(4, 43, 53, 0.95)'}}>
                             <div className="card-body p-4 p-xl-5">
@@ -177,7 +124,7 @@ const CompraPescadoBlanco = () => {
                                             onChange={seleccionarLote}
                                             required
                                         >
-                                            <option value="">-- Seleccionar Blanco --</option>
+                                            <option value="">-- Seleccionar Marisco --</option>
                                             {inventario.map(lote => (
                                                 <option key={lote._id} value={lote._id}>
                                                     {lote.especie} - {lote.tipo} | ${lote.precio}/kg
@@ -244,10 +191,10 @@ const CompraPescadoBlanco = () => {
                 <div className="container text-center">
                     <div className="row justify-content-center mb-5">
                         <div className="col-lg-8">
-                            <h2 className="text-gold mb-3 display-4" style={{fontFamily: "'Cinzel', serif"}}>Pescado Blanco</h2>
+                            <h2 className="text-gold mb-3 display-4" style={{fontFamily: "'Cinzel', serif"}}>Mariscos</h2>
                             <div className="mx-auto mb-4" style={{width: '150px', height: '3px', backgroundColor: 'var(--oro-principal)'}}></div>
                             <p className="lead text-white-50 fs-5">
-                                Variedad de pescado bajo en grasa y sabor suave, ideal para la cocina diaria y gourmet. Capturado en aguas profundas del Golfo.
+                                Capturados diariamente en las costas de Veracruz, nuestros mariscos y crustáceos representan la frescura y calidad que nos distingue. Seleccionados cuidadosamente para garantizar el mejor sabor en cada platillo.
                             </p>
                         </div>
                     </div>
@@ -257,4 +204,4 @@ const CompraPescadoBlanco = () => {
         </div>
     );
 }
-export default CompraPescadoBlanco;
+export default CompraMarisco;

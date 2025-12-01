@@ -8,44 +8,23 @@ const CompraPescadoAzul = () => {
 
   const PRECIO_CAJA = 30;
 
+  // Estado del inventario (se llena desde la API)
   const [inventario, setInventario] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // const [inventario] = useState([
-  //     {
-  //         _id: 'A1',
-  //         especie: 'Atún',
-  //         tipo: 'Aleta Amarilla',
-  //         precio: 180,
-  //         disponible: 200.0,
-  //         cajas: 8,
-  //         imagen: 'https://images.unsplash.com/photo-1512957703080-d97a4521116d?q=80&w=1000&auto=format&fit=crop'
-  //     },
-  //     {
-  //         _id: 'A2',
-  //         especie: 'Sardina',
-  //         tipo: 'Fresca',
-  //         precio: 40,
-  //         disponible: 500.0,
-  //         cajas: 20,
-  //         imagen: 'https://images.unsplash.com/photo-1606850865883-254183940002?q=80&w=1000&auto=format&fit=crop'
-  //     },
-  //     {
-  //         _id: 'A3',
-  //         especie: 'Mojarra',
-  //         tipo: 'Tilapia',
-  //         precio: 85,
-  //         disponible: 150.0,
-  //         cajas: 6,
-  //         imagen: 'https://images.unsplash.com/photo-1529333874952-a6812a972f72?q=80&w=1000&auto=format&fit=crop'
-  //     },
-  // ]);
-
+  // Imagen de fondo inicial
   const [imagenFondo, setImagenFondo] = useState("/img/fondoAzul.jpg");
 
+  // Estado de la compra + Datos del Cliente
   const [compra, guardarCompra] = useState({
     id_lote: "",
-    id_comprador: "Publico General",
+    // --- NUEVOS CAMPOS PARA EL CLIENTE ---
+    nombre_cliente: "",
+    apellido_paterno: "",
+    apellido_materno: "",
+    direccion: "",
+    correo: "",
+    // -------------------------------------
     kilos: "",
     cajas: 0,
     precio_kilo: "",
@@ -55,6 +34,14 @@ const CompraPescadoAzul = () => {
     especieNombre: "",
     especieTipo: "",
   });
+
+  // Función para actualizar cualquier campo del formulario (incluyendo cliente)
+  const actualizarState = (e) => {
+    guardarCompra({
+      ...compra,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const seleccionarLote = (e) => {
     const idLote = e.target.value;
@@ -72,39 +59,41 @@ const CompraPescadoAzul = () => {
       });
       setImagenFondo(loteEncontrado.imagen);
     } else {
-      guardarCompra({
-        ...compra,
+      // Resetear datos del lote pero MANTENER datos del cliente
+      guardarCompra(prev => ({
+        ...prev,
         id_lote: "",
         kilos: "",
         cajas: 0,
         precio_kilo: "",
         especieNombre: "",
         especieTipo: "",
-      });
-      setImagenFondo(
-        "https://images.unsplash.com/photo-1516683037151-9a17603a8ce4?q=80&w=1000&auto=format&fit=crop"
-      );
+      }));
+      setImagenFondo("https://images.unsplash.com/photo-1516683037151-9a17603a8ce4?q=80&w=1000&auto=format&fit=crop");
     }
   };
 
+  // Cargar lotes desde la API al iniciar
   useEffect(() => {
     const cargarLotes = async () => {
       const tipoPescado = "Pescado Azul";
 
       try {
         setCargando(true);
-
         const respuesta = await clienteAxios.get(
           `/api/lote-especie/consulta-tpo/${encodeURIComponent(tipoPescado)}`
         );
-
         setInventario(respuesta.data);
       } catch (error) {
         console.error("Error al cargar lotes disponibles:", error);
+        // Opcional: Poner datos dummy si falla la API para que no se vea vacío en pruebas
+        /* setInventario([
+             { _id: 'A1', especie: 'Atún (Offline)', tipo: 'Aleta Amarilla', precio: 180, disponible: 200.0, cajas: 8, imagen: '...' }
+        ]); */
         Swal.fire(
-          "Error de Conexión",
-          "No se pudieron cargar los lotes disponibles.",
-          "error"
+          "Aviso",
+          "No se pudo conectar con el inventario en tiempo real.",
+          "info"
         );
       } finally {
         setCargando(false);
@@ -114,6 +103,7 @@ const CompraPescadoAzul = () => {
     cargarLotes();
   }, []);
 
+  // Recalcular totales cuando cambian kilos/cajas
   useEffect(() => {
     const { kilos, cajas, precio_kilo } = compra;
     if (kilos && precio_kilo) {
@@ -133,10 +123,11 @@ const CompraPescadoAzul = () => {
   const procesarVenta = async (e) => {
     e.preventDefault();
 
-    if (!compra.id_lote) {
+    // Validación completa
+    if (!compra.id_lote || !compra.nombre_cliente || !compra.apellido_paterno || !compra.direccion) {
       return Swal.fire(
-        "Error",
-        "Debe seleccionar un lote para procesar la venta.",
+        "Datos Incompletos",
+        "Por favor complete la información del cliente y seleccione un producto.",
         "warning"
       );
     }
@@ -144,11 +135,17 @@ const CompraPescadoAzul = () => {
     const precio_kilo_final = parseFloat(compra.precio_kilo);
     const precio_total = parseFloat(compra.gran_total || 0);
 
+    // Payload para tu API (ajustado para incluir datos del cliente si tu backend lo soporta así)
+    // Nota: Si tu backend espera crear el cliente primero, la lógica sería un poco distinta.
+    // Asumiremos que envías todo junto o que usas el código hardcodeado como tenías.
+    
     const payload = {
-      codigo_cpr: '691ea276ba79be1daaf7cb39',
+      codigo_cpr: '691ea276ba79be1daaf7cb39', // Tu ID hardcodeado de prueba (cuidado con esto en prod)
       id_lte: compra.id_lote,
       precio_kilo_final,
       precio_total,
+      // Si tu backend acepta guardar cliente al vuelo:
+      // cliente: { ... } 
     };
 
     try {
@@ -171,7 +168,7 @@ const CompraPescadoAzul = () => {
           navigate(`/compras/recibo/${data.compra._id}`);
         });
       } else {
-        Swal.fire("Error en el Registro", data.mensaje, "error");
+        Swal.fire("Error en el Registro", data.mensaje || "Respuesta inesperada", "error");
       }
     } catch (error) {
       console.error("Error de conexión:", error);
@@ -202,9 +199,11 @@ const CompraPescadoAzul = () => {
 
       <div
         className="container position-relative"
-        style={{ zIndex: 2, minHeight: "80vh", paddingTop: "5vh" }}
+        style={{ zIndex: 2, minHeight: "80vh", paddingTop: "5vh", paddingBottom: "5vh" }}
       >
         <div className="row h-100 align-items-center justify-content-between">
+          
+          {/* COLUMNA IZQUIERDA */}
           <div className="col-lg-5 mb-5 mb-lg-0 text-white animate__animated animate__fadeInLeft">
             <h4
               className="text-gold text-uppercase letter-spacing-2 mb-4"
@@ -220,7 +219,7 @@ const CompraPescadoAzul = () => {
             {compra.id_lote ? (
               <div>
                 <h1
-                  className="display-1 fw-bold mb-2 text-white"
+                  className="display-2 fw-bold mb-2 text-white"
                   style={{
                     fontFamily: "'Playfair Display', serif",
                     textShadow: "0 4px 10px rgba(0,0,0,0.5)",
@@ -229,7 +228,7 @@ const CompraPescadoAzul = () => {
                   {compra.especieNombre}
                 </h1>
                 <h2
-                  className="display-6 text-gold mb-4 fst-italic"
+                  className="display-5 text-gold mb-4 fst-italic"
                   style={{ fontFamily: "'Cinzel', serif" }}
                 >
                   {compra.especieTipo}
@@ -277,12 +276,13 @@ const CompraPescadoAzul = () => {
                   Seleccione su Producto
                 </h1>
                 <p className="lead text-white-50 fs-4">
-                  Alta calidad en pescados azules, ricos en Omega-3.
+                  {cargando ? "Cargando inventario..." : "Alta calidad en pescados azules, ricos en Omega-3."}
                 </p>
               </div>
             )}
           </div>
 
+          {/* COLUMNA DERECHA */}
           <div className="col-lg-6 animate__animated animate__fadeInRight">
             <div
               className="card-premium shadow-lg border-gold"
@@ -304,8 +304,11 @@ const CompraPescadoAzul = () => {
                       name="id_lote"
                       onChange={seleccionarLote}
                       required
+                      disabled={cargando}
                     >
-                      <option value="">-- Seleccionar Azul --</option>
+                      <option value="">
+                        {cargando ? "Cargando..." : "-- Seleccionar Azul --"}
+                      </option>
                       {inventario.map((lote) => (
                         <option key={lote._id} value={lote._id}>
                           {lote.especie} - {lote.tipo} | ${lote.precio}/kg
@@ -314,8 +317,37 @@ const CompraPescadoAzul = () => {
                     </select>
                   </div>
 
+                  {/* FORMULARIO DE CLIENTE (INTEGRADO) */}
                   {compra.id_lote && (
-                    <div className="animate__animated animate__fadeInUp">
+                    <div className="animate__animated animate__fadeIn">
+                      <h5 className="text-gold mb-4 border-bottom border-secondary pb-2" style={{fontFamily: "'Cinzel', serif"}}>Datos del Cliente</h5>
+                      
+                      <div className="mb-3">
+                          <label className="form-label text-white-50 small text-uppercase">Nombre</label>
+                          <input type="text" className="form-control bg-transparent text-white border-secondary" name="nombre_cliente" onChange={actualizarState} required />
+                      </div>
+                      
+                      <div className="row mb-3">
+                          <div className="col-6">
+                              <label className="form-label text-white-50 small text-uppercase">Ap. Paterno</label>
+                              <input type="text" className="form-control bg-transparent text-white border-secondary" name="apellido_paterno" onChange={actualizarState} required/>
+                          </div>
+                          <div className="col-6">
+                              <label className="form-label text-white-50 small text-uppercase">Ap. Materno</label>
+                              <input type="text" className="form-control bg-transparent text-white border-secondary" name="apellido_materno" onChange={actualizarState}/>
+                          </div>
+                      </div>
+
+                      <div className="mb-3">
+                          <label className="form-label text-white-50 small text-uppercase">Dirección</label>
+                          <input type="text" className="form-control bg-transparent text-white border-secondary" name="direccion" onChange={actualizarState} required />
+                      </div>
+
+                      <div className="mb-4">
+                          <label className="form-label text-white-50 small text-uppercase">Correo</label>
+                          <input type="email" className="form-control bg-transparent text-white border-secondary" name="correo" onChange={actualizarState} />
+                      </div>
+
                       <div
                         className="p-4 rounded mb-4"
                         style={{
@@ -378,6 +410,7 @@ const CompraPescadoAzul = () => {
         </div>
       </div>
 
+      {/* SECCIÓN INFO */}
       <section
         className="py-5 bg-animated"
         style={{
