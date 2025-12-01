@@ -1,0 +1,253 @@
+/* IMPORTAR FUENTES */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;700&display=swap');
+
+:root {
+  --color-fondo: #021E26;      
+  --color-panel: #042B35;
+  --color-brillo: #063e4c;      
+  --oro-principal: #D4AF37;    
+  --oro-brillo: #F3E5AB;       
+  --oro-oscuro: #AA8C2C;       
+  --texto-blanco: #F0F0F0;
+  --texto-gris: #B0C4DE;
+}
+
+/* --- ESTILOS BASE --- */
+body {
+  background-color: var(--color-fondo);
+  color: var(--texto-blanco);
+  font-family: 'Lato', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, .navbar-brand, .card-title, .btn-premium {
+  font-family: 'Cinzel', serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* --- ANIMACIÓN DE FONDO (OLAS) --- */
+.bg-animated {
+    background: linear-gradient(45deg, #021E26, #074555, #021E26, #074555);
+    background-size: 400% 400%;
+    animation: gradientWaves 8s ease infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Capa de "ruido" o textura opcional para simular agua */
+.bg-animated::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml,%3Csvg width="100" height="20" viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M21.184 20c.357-.13.72-.264 1.088-.402l1.768-.661C33.64 15.347 39.647 14 50 14c10.271 0 15.362 1.222 24.629 4.928.955.383 1.869.74 2.75 1.072h6.225c-2.51-.73-5.139-1.691-8.233-2.928C65.888 12.878 59.4 10 50 10c-9.316 0-15.712 2.814-24.516 6.338-3.113 1.245-5.95 2.278-8.703 3.114h4.403zM53.59 3.8c1.814-.58 3.83-.98 5.934-1.235C64.69 1.673 69.507 1 75.5 1c10.471 0 15.753 2.228 24.5 6.305V5.51c-7.617-3.183-12.05-5.102-20.883-5.417C73.058-.138 66.447.793 59.124 3.16l-2.153.708c-.918.302-1.88.63-2.882.967L47.49 3.8 53.59 3.8z" fill="%23184e5c" fill-opacity="0.2" fill-rule="evenodd"/%3E%3C/svg%3E');
+    opacity: 0.9;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes gradientWaves {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+.navbar-symbol {
+  background: linear-gradient(to bottom, #042B35, #02181E);
+  border-bottom: 3px solid var(--oro-principal);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  padding: 1rem 2rem;
+  z-index: 10;
+}
+
+.navbar-brand {
+  font-size: 1.8rem;
+  color: var(--oro-principal) !important;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-link {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--texto-blanco) !important;
+  margin-left: 1.5rem;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--oro-brillo) !important;
+  border-bottom: 1px solid var(--oro-principal);
+}
+
+/* --- BOTONES --- */
+.btn-symbol-primary, .btn-primary, .btn-premium {
+  background: linear-gradient(180deg, var(--oro-principal) 0%, var(--oro-oscuro) 100%);
+  color: #000 !important;
+  border: 1px solid var(--oro-brillo);
+  border-radius: 6px;
+  font-weight: 700;
+  padding: 12px 30px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-compra {
+  background: linear-gradient(180deg, var(--color-brillo) 1%, var(--color-fondo) 99%);
+  color: #ffffff !important;
+  border: 1px solid var(--oro-principal);
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: large;
+  padding: 24px 30px;
+  box-shadow: 0 0px 20px rgba(121, 103, 0, 0.7);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-compra:hover {
+  transform: translateY(-10px);
+  background: linear-gradient(180deg, var(--color-brillo) 1%, var(--color-panel) 99%);
+  box-shadow: 0 40 40px rgba(255, 196, 0, 0.613);
+  color: #000;
+  border-color: var(--oro-brillo);
+}
+
+.btn-symbol-primary:hover, .btn-primary:hover, .btn-premium:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  color: #000;
+  border-color: white;
+}
+
+/* --- TARJETAS --- */
+.card, .card-premium {
+  background-color: rgba(4, 43, 53, 0.9); /* Más opacidad para legibilidad */
+  border: 2px solid var(--oro-oscuro); /* Borde dorado más visible */
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  padding: 2rem;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+}
+
+.card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--oro-oscuro);
+  color: var(--oro-principal);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.text-gold {
+  color: var(--oro-principal) !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  color: var(--oro-principal);
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+}
+
+.service-card {
+  background: linear-gradient(145deg, #05323e, #032029);
+  border: 1px solid var(--oro-oscuro);
+  border-radius: 8px;
+  padding: 2rem;
+  height: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+  border-color: var(--oro-brillo);
+}
+
+.service-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--oro-oscuro);
+  background-color: rgba(212, 175, 55, 0.1);
+  margin-bottom: 1.5rem;
+  color: var(--oro-principal);
+}
+
+/* Ajustes de Inputs */
+.form-control, .form-select {
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--oro-oscuro);
+  color: var(--texto-blanco);
+  border-radius: 4px;
+}
+.form-control:focus {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-color: var(--oro-brillo);
+  box-shadow: 0 0 5px var(--oro-oscuro);
+  color: white;
+}
+
+.text-premium-lg {
+  font-size: 1.25rem; 
+  font-weight: 600;   
+  letter-spacing: 0.5px;
+}
+.text-value-lg {
+  font-size: 2rem;
+  font-weight: 800;
+  font-family: 'Inter', sans-serif;
+}
+
+.table-premium {
+  --bs-table-bg: transparent !important;
+  --bs-table-accent-bg: transparent !important;
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.02) !important;
+  --bs-table-hover-bg: rgba(212, 175, 55, 0.1) !important;
+  
+  color: #e0e0e0 !important; 
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.table-premium thead th {
+  background-color: rgba(2, 30, 38, 0.9) !important; 
+  color: var(--oro-principal) !important;
+  border-bottom: 2px solid var(--oro-oscuro);
+  font-family: 'Cinzel', serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.table-premium tbody td {
+  background-color: transparent !important; 
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 1.2rem;
+  padding-bottom: 1.2rem;
+  vertical-align: middle;
+}
+
+.table-premium tbody tr:hover td {
+  background-color: rgba(212, 175, 55, 0.05) !important; 
+  color: white !important;
+}
