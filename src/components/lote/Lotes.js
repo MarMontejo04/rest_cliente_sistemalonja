@@ -176,7 +176,7 @@ const Lotes = () => {
                           )}
 
                           <Link
-                            to={`/lotes/editar/${lotes._id}`}
+                            to={`/lotes/editar/${lote._id}`}
                             className="btn btn-sm btn-outline-warning px-3 d-flex align-items-center gap-2"
                             style={{
                               borderColor: "var(--oro-oscuro)",
