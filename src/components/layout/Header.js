@@ -3,13 +3,16 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
     return (
+        // Navbar con estilo symbol (fondo oscuro y borde dorado)
         <nav className="navbar navbar-expand-lg navbar-symbol sticky-top">
             <div className="container-fluid">
                 
+                {/* Marca / Logo */}
                 <Link to="/" className="navbar-brand">
                     <i className="fas fa-anchor me-2"></i> LONJA VERACRUZ
                 </Link>
                 
+                {/* Botón menú móvil */}
                 <button
                     className="navbar-toggler btn-premium" 
                     type="button" 
@@ -26,6 +29,7 @@ const Header = () => {
                 <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
                     <ul className="navbar-nav align-items-center">
                         
+                        {/* --- ENLACES PÚBLICOS --- */}
                         <li className="nav-item">
                             <Link to="/" className="nav-link">Inicio</Link>
                         </li>
@@ -43,21 +47,27 @@ const Header = () => {
                             <Link to="/compras/marisco" className="nav-link">Mariscos</Link>
                         </li>
                         
-                        <li className="nav-item d-none d-lg-block mx-3 text-muted">|</li>
+                        <li className="nav-item d-none d-lg-block mx-2 text-muted">|</li>
 
-                        <li className="nav-item ms-lg-3">
-                            <Link to="/lotes" className="nav-link text-gold">
-                                <i className="fas fa-chart-line me-1"></i> Lotes
+                        <li className="nav-item">
+                            <Link to="/lotes" className="nav-link text-gold fw-bold">
+                                Lotes
                             </Link>
                         </li>
 
-                        <li className="nav-item ms-lg-3">
-                            <Link to="/compras/reporte" className="nav-link text-gold">
-                                <i className="fas fa-chart-pie me-1"></i> Ventas del Día
+                        <li className="nav-item">
+                            <Link to="/nuevoVendedor" className="nav-link text-gold fw-bold">
+                                Nuevo Vendedor
                             </Link>
                         </li>
 
-                        <li className="nav-item ms-lg-4 mt-3 mt-lg-0">
+                        <li className="nav-item">
+                            <Link to="/compras/reporte" className="nav-link text-gold fw-bold">
+                                Ventas del Día
+                            </Link>
+                        </li>
+
+                        <li className="nav-item ms-lg-3 mt-3 mt-lg-0">
                             <Link to="/login" className="btn btn-symbol-primary text-decoration-none">
                                 <i className="fas fa-user-circle me-2"></i> Vendedor
                             </Link>
