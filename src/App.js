@@ -11,6 +11,8 @@ import Login from "./components/auth/Login";
 import EditarVendedor from "./components/vendedor/EditarVendedores.js";
 import Vendedores from "./components/vendedor/Vendedores.js";
 
+import Cliente from "./components/client/NuevoComprador.js"
+
 
 import Lotes from "./components/lote/Lotes";
 import NuevoLote from "./components/lote/NuevoLote";
@@ -39,6 +41,9 @@ function App() {
                 <Route path="/nuevoVendedor" element={<NuevoVendedor />} />
                 <Route path="/Vendedores" element={<Vendedores />} />
                 <Route path="/vendedores/editar/:id" element={<EditarVendedor />} />
+
+                <Route path="/cliente/crearCliente" element={<Cliente />} />
+
 
                 <Route path="/lotes" element={<Lotes />} />
                 <Route path='/lotes/nuevo' element={<NuevoLote />} />
