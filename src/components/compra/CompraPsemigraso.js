@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from "react";
-import clienteAxios from "../../config/axios.js";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import clienteAxios from "../../config/axios.js";
 
 const CompraPescadoSemigraso = () => {
   const navigate = useNavigate();
   const PRECIO_CAJA = 30;
 
+  // Estados de Búsqueda de Cliente
   const [correoBusqueda, setCorreoBusqueda] = useState("");
-  const [clienteEncontrado, setClienteEncontrado] = useState(null); // null = no buscado, true = existe, false = no existe
-  const [datosCliente, setDatosCliente] = useState(null);
+  // null = no buscado, true = existe, false = no existe (y debe redirigir)
+  const [clienteEncontrado, setClienteEncontrado] = useState(null); 
+  const [datosCliente, setDatosCliente] = useState(null); // Almacena el objeto comprador si se encuentra
 
+  // Inventario y Carga
   const [inventario, setInventario] = useState([]);
   const [cargando, setCargando] = useState(true);
-
   const [imagenFondo, setImagenFondo] = useState(
     "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
   );
 
   const [compra, guardarCompra] = useState({
-    nombre_cliente: "",
-    apellido_paterno: "",
-    apellido_materno: "",
-    direccion: "",
-    correo: "",
+    // Simplificamos: Quitamos los campos de formulario de cliente (nombre_cliente, etc.)
+    codigo_cpr: "", // ID del comprador que se llena después de la búsqueda exitosa
     id_lote: "",
     kilos: "",
     cajas: 0,
@@ -45,6 +44,7 @@ const CompraPescadoSemigraso = () => {
   const seleccionarLote = (e) => {
     const idLote = e.target.value;
     const loteEncontrado = inventario.find((l) => l._id === idLote);
+    
     if (loteEncontrado) {
       guardarCompra((prev) => ({
         ...prev,
@@ -73,8 +73,13 @@ const CompraPescadoSemigraso = () => {
         "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
       );
     }
+    // Al cambiar de lote, se resetea la búsqueda de cliente
+    setClienteEncontrado(null);
+    setDatosCliente(null);
+    guardarCompra((prev) => ({ ...prev, codigo_cpr: "" }));
   };
 
+  // Cargar lotes desde la API (NO MODIFICADA)
   useEffect(() => {
     const cargarLotes = async () => {
       const tipoPescado = "Pescado Semigraso";
@@ -87,10 +92,6 @@ const CompraPescadoSemigraso = () => {
         setInventario(respuesta.data);
       } catch (error) {
         console.error("Error al cargar lotes disponibles:", error);
-        // Opcional: Poner datos dummy si falla la API para que no se vea vacío en pruebas
-        /* setInventario([
-               { _id: 'A1', especie: 'Atún (Offline)', tipo: 'Aleta Amarilla', precio: 180, disponible: 200.0, cajas: 8, imagen: '...' }
-          ]); */
         Swal.fire(
           "Aviso",
           "No se pudo conectar con el inventario en tiempo real.",
@@ -105,7 +106,7 @@ const CompraPescadoSemigraso = () => {
   }, []);
 
   // ----------------------------
-  //  CÁLCULOS AUTOMÁTICOS
+  //  CÁLCULOS AUTOMÁTICOS (NO MODIFICADA)
   // ----------------------------
   useEffect(() => {
     const { kilos, cajas, precio_kilo } = compra;
@@ -123,7 +124,7 @@ const CompraPescadoSemigraso = () => {
   }, [compra.kilos, compra.cajas, compra.precio_kilo]);
 
   // ----------------------------
-  //  BUSCAR CLIENTE POR CORREO (BOTÓN)
+  //  BUSCAR CLIENTE POR CORREO (Redirección si no existe)
   // ----------------------------
   const buscarCliente = async () => {
     if (!correoBusqueda) {
@@ -140,48 +141,52 @@ const CompraPescadoSemigraso = () => {
       const res = await clienteAxios.get(
         `/api/comprador/consulta/${correoBusqueda}`
       );
-      // backend: debe devolver [] o comprador en array
+      
       const data = res.data;
-      if (!data || (Array.isArray(data) && data.length === 0)) {
-        setClienteEncontrado(false);
-        setDatosCliente(null);
-        // rellenar correo en compra para cuando se cree
-        guardarCompra((prev) => ({ ...prev, correo: correoBusqueda }));
+      
+      if (data && data._id) { 
+        setClienteEncontrado(true);
+        setDatosCliente(data);
+        guardarCompra((prev) => ({
+          ...prev,
+          codigo_cpr: data._id, // Almacenar el ID del comprador encontrado
+        }));
+        
+        Swal.fire({
+          icon: "success",
+          title: "Cliente encontrado",
+          text: `Bienvenido ${data.nombre} ${data.apellido_paterno}`,
+          timer: 1500,
+          showConfirmButton: false,
+        });
         return;
       }
-
-      // si devolvió un array con comprador
-      const found = Array.isArray(data) ? data[0] : data;
-      setClienteEncontrado(true);
-      setDatosCliente(found);
-
-      // autocompletar fields y bloquear/usar para crear compra
-      guardarCompra((prev) => ({
-        ...prev,
-        nombre_cliente: found.nombre,
-        apellido_paterno: found.apellido_paterno,
-        apellido_materno: found.apellido_materno || "",
-        direccion: found.direccion || "",
-        correo: found.correo,
-      }));
-      Swal.fire({
-        icon: "success",
-        title: "Cliente encontrado",
-        text: `Bienvenido ${found.nombre}`,
-        timer: 1200,
-        showConfirmButton: false,
-      });
+      
+      // Si la API no lo encuentra (aunque esto debería ser manejado por el catch con 404):
+      throw new Error("Cliente no encontrado.");
+      
     } catch (err) {
       console.error("Error al buscar comprador:", err);
-      // si 404 o error, asumimos no existe
+      
       setClienteEncontrado(false);
       setDatosCliente(null);
-      guardarCompra((prev) => ({ ...prev, correo: correoBusqueda }));
+      guardarCompra((prev) => ({ ...prev, codigo_cpr: "" }));
+      
+      // REDIRECCIÓN A VISTA DE CREACIÓN DE CLIENTE
+      Swal.fire({
+        icon: "info",
+        title: "Cliente no registrado",
+        text: `El correo ${correoBusqueda} no fue encontrado. Será redirigido para registrarlo.`,
+        confirmButtonColor: "var(--oro-principal)",
+      }).then(() => {
+        // Redirigir y pasar el correo para precargar el formulario
+        navigate(`/cliente/crearCliente`, { state: { correo: correoBusqueda } });
+      });
     }
   };
 
   // ----------------------------
-  //  PROCESAR VENTA: si cliente existe -> crear compra con codigo_cpr; si no existe -> crear comprador primero
+  //  PROCESAR VENTA (Solo si cliente encontrado)
   // ----------------------------
   const procesarVenta = async (e) => {
     e.preventDefault();
@@ -195,52 +200,25 @@ const CompraPescadoSemigraso = () => {
       });
       return;
     }
-
-    try {
-      let compradorId = null;
-
-      if (clienteEncontrado === true && datosCliente && datosCliente._id) {
-        // comprador ya existe
-        compradorId = datosCliente._id;
-      } else {
-        // Cliente nuevo -> validar campos
-        if (
-          !compra.nombre_cliente ||
-          !compra.apellido_paterno ||
-          !compra.direccion
-        ) {
-          Swal.fire({
+    
+    // Validación CRUCIAL: Solo procesar si el cliente fue encontrado
+    if (clienteEncontrado !== true || !compra.codigo_cpr) {
+         Swal.fire({
             icon: "error",
-            title: "Faltan Datos",
-            text: "Complete los datos del cliente.",
+            title: "Cliente no verificado",
+            text: "Busque y verifique el correo del cliente antes de procesar la venta.",
             confirmButtonColor: "var(--oro-principal)",
           });
           return;
-        }
+    }
 
-        // Crear comprador en backend
-        const nuevo = {
-          nombre: compra.nombre_cliente,
-          apellido_paterno: compra.apellido_paterno,
-          apellido_materno: compra.apellido_materno,
-          direccion: compra.direccion,
-          correo: compra.correo || correoBusqueda,
-        };
-
-        const resCrear = await clienteAxios.post(
-          "/api/comprador/registrar",
-          nuevo
-        );
-        // tu controlador responde { mensaje: "Se creó el comprador", data: compradores }
-        compradorId = resCrear.data?.data?._id || resCrear.data?.data;
-      }
-
-      // Crear compra en backend
+    try {
+      // Crear payload de la Compra
       const payloadCompra = {
-        codigo_cpr: compradorId,
+        codigo_cpr: compra.codigo_cpr, 
         id_lte: compra.id_lote,
-        precio_kilo_final: compra.precio_kilo,
-        precio_total: compra.gran_total,
+        precio_kilo_final: parseFloat(compra.precio_kilo),
+        precio_total: parseFloat(compra.gran_total),
       };
 
       const resCompra = await clienteAxios.post(
@@ -250,19 +228,23 @@ const CompraPescadoSemigraso = () => {
 
       Swal.fire({
         title: "Venta registrada",
-        text: `Total: $${compra.gran_total}`,
+        text: `Total: $${resCompra.data.compra.precio_total}`,
         icon: "success",
         confirmButtonColor: "var(--oro-principal)",
         background: "#042B35",
         color: "#F0F0F0",
       });
 
-      // redirigir a ReciboVenta manteniendo datos (igual que en tu ReciboVenta)
-      const folioGenerado = `V-${Math.floor(Math.random() * 100000)}`;
+      // Redirigir a ReciboVenta
+      const folioGenerado = resCompra.data.compra._id;
       navigate(`/compras/recibo/${folioGenerado}`, {
         state: {
           folio: folioGenerado,
-          datosVenta: compra,
+          datosVenta: {
+             ...compra,
+             nombre_cliente: datosCliente.nombre,
+             apellido_paterno: datosCliente.apellido_paterno
+          }
         },
       });
     } catch (error) {
@@ -418,7 +400,7 @@ const CompraPescadoSemigraso = () => {
                       onChange={seleccionarLote}
                       required
                     >
-                      <option value="">-- Catálogo de Mariscos --</option>
+                      <option value="">-- Catálogo de Pescado Semigraso --</option>
                       {inventario.map((lote) => (
                         <option key={lote._id} value={lote._id}>
                           {lote.especie} - {lote.tipo} | {lote.disponible}kg
@@ -427,7 +409,7 @@ const CompraPescadoSemigraso = () => {
                       ))}
                     </select>
                   </div>
-                  {/* PASO 2: VERIFICAR COMPRADOR (Solo si hay lote seleccionado) */}
+                  {/* PASO 2: VERIFICAR COMPRADOR */}
                   {compra.id_lote && (
                     <div className="animate__animated animate__fadeIn">
                       <label className="form-label text-gold fw-bold text-uppercase small mb-2">
@@ -440,16 +422,19 @@ const CompraPescadoSemigraso = () => {
                           placeholder="correo@cliente.com"
                           value={correoBusqueda}
                           onChange={(e) => setCorreoBusqueda(e.target.value)}
+                          // Deshabilitar después de encontrar el cliente
+                          disabled={clienteEncontrado === true}
                         />
                         <button
                           className="btn btn-outline-warning"
                           type="button"
                           onClick={buscarCliente}
+                          disabled={clienteEncontrado === true}
                         >
                           <i className="fas fa-search me-2"></i> Verificar
                         </button>
 
-                        {/* Botón para resetear búsqueda si te equivocaste */}
+                        {/* Botón para resetear búsqueda */}
                         {clienteEncontrado !== null && (
                           <button
                             className="btn btn-outline-secondary"
@@ -458,101 +443,41 @@ const CompraPescadoSemigraso = () => {
                               setClienteEncontrado(null);
                               setDatosCliente(null);
                               setCorreoBusqueda("");
-                              guardarCompra({
-                                ...compra,
-                                nombre_cliente: "",
-                                direccion: "",
-                              });
+                              guardarCompra((prev) => ({
+                                ...prev,
+                                codigo_cpr: "",
+                              }));
                             }}
                           >
                             <i className="fas fa-times"></i>
                           </button>
                         )}
                       </div>
-                      {/* PASO 3: FORMULARIO CONDICIONAL */}
-                      {clienteEncontrado === true && (
+                      
+                      {/* ESTADO DEL CLIENTE */}
+                      {clienteEncontrado === true && datosCliente && (
                         <div className="alert alert-success bg-transparent border-success text-success small">
                           <i className="fas fa-check-circle me-2"></i> Cliente
-                          registrado. Confirme la venta o edite datos si es
-                          necesario.
+                          registrado:{" "}
+                          <strong>
+                            {datosCliente.nombre} {datosCliente.apellido_paterno}
+                          </strong>
+                          .
                         </div>
                       )}
                       {clienteEncontrado === false && (
-                        <div className="alert alert-info bg-transparent border-info text-info small">
+                         <div className="alert alert-info bg-transparent border-info text-info small">
                           <i className="fas fa-info-circle me-2"></i> Cliente
-                          nuevo. Complete el registro.
+                          no encontrado. 
                         </div>
                       )}
 
-                      {/* FORMULARIO (solo cuando NO existe) */}
-                      {clienteEncontrado === false && (
-                        <div className="animate__animated animate__fadeIn">
-                          <h5
-                            className="text-gold mb-4 border-bottom border-secondary pb-2"
-                            style={{ fontFamily: "'Cinzel', serif" }}
-                          >
-                            Datos del Cliente
-                          </h5>
-
-                          <div className="mb-3">
-                            <label className="form-label text-white-50 small text-uppercase">
-                              Nombre
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control bg-transparent text-white border-secondary"
-                              name="nombre_cliente"
-                              onChange={actualizarState}
-                              required
-                            />
-                          </div>
-
-                          <div className="row mb-3">
-                            <div className="col-6">
-                              <label className="form-label text-white-50 small text-uppercase">
-                                Ap. Paterno
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control bg-transparent text-white border-secondary"
-                                name="apellido_paterno"
-                                onChange={actualizarState}
-                                required
-                              />
-                            </div>
-                            <div className="col-6">
-                              <label className="form-label text-white-50 small text-uppercase">
-                                Ap. Materno
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control bg-transparent text-white border-secondary"
-                                name="apellido_materno"
-                                onChange={actualizarState}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="mb-3">
-                            <label className="form-label text-white-50 small text-uppercase">
-                              Dirección
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control bg-transparent text-white border-secondary"
-                              name="direccion"
-                              onChange={actualizarState}
-                              required
-                            />
-                          </div>
-                        </div>
-                      )}
-                      {/* PASO 4: CAMPOS DE COMPRA (si ya se buscó) */}
-                      {clienteEncontrado !== null && (
+                      {/* PASO 3: CAMPOS DE COMPRA (solo si el cliente fue encontrado) */}
+                      {clienteEncontrado === true && (
                         <>
                           <div className="mb-3 mt-4">
                             <label className="form-label text-white-50 small text-uppercase">
-                              Kilos
+                              3. Kilos
                             </label>
                             <input
                               type="number"
@@ -577,16 +502,13 @@ const CompraPescadoSemigraso = () => {
                               required
                             />
                           </div>
+                          <div className="mt-3"></div>
                         </>
-                      )}
-                      {/* BOTÓN */}
-                      {clienteEncontrado !== null && (
-                        <div className="mt-3"></div>
                       )}
                     </div>
                   )}
                   {/* BOTÓN FINAL */}
-                  {compra.id_lote && clienteEncontrado !== null && (
+                  {compra.id_lote && clienteEncontrado === true && (
                     <button
                       type="submit"
                       className="btn-premium w-100 py-4 fs-4 fw-bold shadow-lg d-flex justify-content-between align-items-center px-5"
