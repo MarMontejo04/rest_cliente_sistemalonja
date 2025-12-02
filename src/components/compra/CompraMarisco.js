@@ -14,6 +14,7 @@ const CompraMarisco = () => {
 
     // Inventario (desde DB)
     const [inventario, setInventario] = useState([]);
+      const [cargando, setCargando] = useState(true);
     const [imagenFondo, setImagenFondo] = useState('https://images.unsplash.com/photo-1615141982880-1313d87a7409?q=80&w=2070&auto=format&fit=crop');
     
     const [compra, guardarCompra] = useState({
@@ -27,82 +28,33 @@ const CompraMarisco = () => {
     //  CARGAR TIPOS / ESPECIES / LOTES (ARMAR INVENTARIO)
     // ----------------------------
     useEffect(() => {
-        const cargarInventario = async () => {
+          const cargarLotes = async () => {
+            const tipoPescado = "Marisco";
+      
             try {
-                // 1) Traer tipos para buscar el id de "mariscos" (si existe)
-                const tiposRes = await clienteAxios.get('/api/tipo/consulta');
-                const tipos = tiposRes.data || [];
-                // buscar tipo cuyo nombre contenga 'marisc' (case-insensitive)
-                const tipoMariscos = tipos.find(t => t.nombre && t.nombre.toLowerCase().includes('marisc'));
-
-                // 2) Traer especies
-                const especiesRes = await clienteAxios.get('/api/especie/consulta');
-                const especies = especiesRes.data || [];
-
-                // 3) Traer lotes
-                const lotesRes = await clienteAxios.get('/api/lote/consulta');
-                const lotes = lotesRes.data || [];
-
-                // 4) Armar inventario: para cada especie que pertenezca a tipoMariscos (si existe), emparejar con su lote (id_lte)
-                const inv = [];
-
-                especies.forEach(sp => {
-                    // si hay tipoMariscos, filtrar por id_tpo === tipoMariscos._id
-                    if (tipoMariscos && (!sp.id_tpo || sp.id_tpo.toString() !== tipoMariscos._id.toString())) {
-                        return; // saltar especies que no sean mariscos
-                    }
-
-                    // encontrar lote referenciado (id_lte)
-                    if (!sp.id_lte) return;
-                    const loteRelacionado = lotes.find(l => l._id && l._id.toString() === sp.id_lte.toString());
-                    if (!loteRelacionado) return;
-
-                    // solo incluir lotes activos y sin compra asignada (disponible)
-                    if (loteRelacionado.activo === false) return;
-                    if (loteRelacionado.id_cmp !== null) return;
-
-                    inv.push({
-                        _id: loteRelacionado._id,
-                        especie: sp.nombre,
-                        tipo: tipoMariscos ? tipoMariscos.nombre : (sp.nombre || 'Marisco'),
-                        precio: loteRelacionado.precio_kilo_salida,
-                        disponible: loteRelacionado.kilos,
-                        cajas: loteRelacionado.numero_cajas,
-                        imagen: sp.imagen || 'https://images.unsplash.com/photo-1615141982880-1313d87a7409?q=80&w=2070&auto=format&fit=crop',
-                        raw_lote: loteRelacionado,
-                        raw_especie: sp
-                    });
-                });
-
-                // Si no encontramos inv (por falta de tipo), como fallback incluir todos los lotes sin especie (mapear lotes directamente)
-                if (inv.length === 0) {
-                    lotes.forEach(lote => {
-                        if (lote.activo === false) return;
-                        if (lote.id_cmp !== null) return;
-                        inv.push({
-                            _id: lote._id,
-                            especie: 'Variedad',
-                            tipo: 'General',
-                            precio: lote.precio_kilo_salida,
-                            disponible: lote.kilos,
-                            cajas: lote.numero_cajas,
-                            imagen: 'https://images.unsplash.com/photo-1615141982880-1313d87a7409?q=80&w=2070&auto=format&fit=crop',
-                            raw_lote: lote,
-                            raw_especie: null
-                        });
-                    });
-                }
-
-                setInventario(inv);
+              setCargando(true);
+              const respuesta = await clienteAxios.get(
+                `/api/lote-especie/consulta-tpo/${encodeURIComponent(tipoPescado)}`
+              );
+              setInventario(respuesta.data);
             } catch (error) {
-                console.error("Error cargando inventario desde API:", error);
-                // mantener inventario vacío como fallback (o podrías cargar dummy aquí)
-                setInventario([]);
+              console.error("Error al cargar lotes disponibles:", error);
+              // Opcional: Poner datos dummy si falla la API para que no se vea vacío en pruebas
+              /* setInventario([
+                     { _id: 'A1', especie: 'Atún (Offline)', tipo: 'Aleta Amarilla', precio: 180, disponible: 200.0, cajas: 8, imagen: '...' }
+                ]); */
+              Swal.fire(
+                "Aviso",
+                "No se pudo conectar con el inventario en tiempo real.",
+                "info"
+              );
+            } finally {
+              setCargando(false);
             }
-        };
-
-        cargarInventario();
-    }, []);
+          };
+      
+          cargarLotes();
+        }, []);
 
     // ----------------------------
     //  SELECCIONAR LOTE (usa inventario real)

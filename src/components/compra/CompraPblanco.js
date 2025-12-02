@@ -3,13 +3,17 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import clienteAxios from "../../config/axios.js";
 
-
 const CompraPescadoBlanco = () => {
   const navigate = useNavigate();
   const PRECIO_CAJA = 30;
 
   const [inventario, setInventario] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [correoBusqueda, setCorreoBusqueda] = useState("");
+
+  const [clienteEncontrado, setClienteEncontrado] = useState(null); // null = no buscado, true = existe, false = no existe
+  const [datosCliente, setDatosCliente] = useState(null);
+
   const [imagenFondo, setImagenFondo] = useState(
     "https://images.unsplash.com/photo-1580910530099-e55c327801f6?q=80&w=1000&auto=format&fit=crop"
   ); // Fondo inicial
@@ -74,115 +78,208 @@ const CompraPescadoBlanco = () => {
     }
   };
 
-   useEffect(() => {
-      const cargarLotes = async () => {
-        const tipoPescado = "Pescado Blanco";
-  
-        try {
-          setCargando(true);
-          const respuesta = await clienteAxios.get(
-            `/api/lote-especie/consulta-tpo/${encodeURIComponent(tipoPescado)}`
-          );
-          setInventario(respuesta.data);
-        } catch (error) {
-          console.error("Error al cargar lotes disponibles:", error);
-          // Opcional: Poner datos dummy si falla la API para que no se vea vacío en pruebas
-          /* setInventario([
+  useEffect(() => {
+    const cargarLotes = async () => {
+      const tipoPescado = "Pescado Blanco";
+
+      try {
+        setCargando(true);
+        const respuesta = await clienteAxios.get(
+          `/api/lote-especie/consulta-tpo/${encodeURIComponent(tipoPescado)}`
+        );
+        setInventario(respuesta.data);
+      } catch (error) {
+        console.error("Error al cargar lotes disponibles:", error);
+        // Opcional: Poner datos dummy si falla la API para que no se vea vacío en pruebas
+        /* setInventario([
                  { _id: 'A1', especie: 'Atún (Offline)', tipo: 'Aleta Amarilla', precio: 180, disponible: 200.0, cajas: 8, imagen: '...' }
             ]); */
-          Swal.fire(
-            "Aviso",
-            "No se pudo conectar con el inventario en tiempo real.",
-            "info"
-          );
-        } finally {
-          setCargando(false);
-        }
-      };
-  
-      cargarLotes();
-    }, []);
-  
-    useEffect(() => {
-      const { kilos, cajas, precio_kilo } = compra;
-      if (kilos && precio_kilo) {
-        const costoPescado = parseFloat(kilos) * parseFloat(precio_kilo);
-        const costoEnvases = parseFloat(cajas) * PRECIO_CAJA;
-        const totalFinal = costoPescado + costoEnvases;
-  
-        guardarCompra((prev) => ({
-          ...prev,
-          total_pescado: costoPescado.toFixed(2),
-          total_cajas: costoEnvases.toFixed(2),
-          gran_total: totalFinal.toFixed(2),
-        }));
-      }
-    }, [compra.kilos, compra.cajas, compra.precio_kilo]);
-  
-    const procesarVenta = async (e) => {
-      e.preventDefault();
-  
-      // Validación completa
-      if (
-        !compra.id_lote ||
-        !compra.nombre_cliente ||
-        !compra.apellido_paterno ||
-        !compra.direccion
-      ) {
-        return Swal.fire(
-          "Datos Incompletos",
-          "Por favor complete la información del cliente y seleccione un producto.",
-          "warning"
+        Swal.fire(
+          "Aviso",
+          "No se pudo conectar con el inventario en tiempo real.",
+          "info"
         );
-      }
-  
-      const precio_kilo_final = parseFloat(compra.precio_kilo);
-      const precio_total = parseFloat(compra.gran_total || 0);
-  
-      // Payload para tu API (ajustado para incluir datos del cliente si tu backend lo soporta así)
-      // Nota: Si tu backend espera crear el cliente primero, la lógica sería un poco distinta.
-      // Asumiremos que envías todo junto o que usas el código hardcodeado como tenías.
-  
-      const payload = {
-        codigo_cpr: compra.codigo_cpr, // Tu ID hardcodeado de prueba (cuidado con esto en prod)
-        id_lte: compra.id_lote,
-        precio_kilo_final,
-        precio_total,
-        // Si tu backend acepta guardar cliente al vuelo:
-        // cliente: { ... }
-      };
-  
-      try {
-        const respuesta = await clienteAxios.post(
-          `/api/compra/registrar`,
-          payload
-        );
-  
-        const data = respuesta.data;
-  
-        if (data.compra && data.compra._id) {
-          Swal.fire({
-            title: "Venta Exitosa",
-            text: `Total a cobrar: $${data.compra.precio_total}`,
-            icon: "success",
-            confirmButtonColor: "var(--oro-principal)",
-            background: "#042B35",
-            color: "#F0F0F0",
-          }).then(() => {
-            navigate(`/compras/recibo/${data.compra._id}`);
-          });
-        } else {
-          Swal.fire(
-            "Error en el Registro",
-            data.mensaje || "Respuesta inesperada",
-            "error"
-          );
-        }
-      } catch (error) {
-        console.error("Error de conexión:", error);
-        Swal.fire("Error", "Problema con el servidor.", "error");
+      } finally {
+        setCargando(false);
       }
     };
+
+    cargarLotes();
+  }, []);
+
+  // ----------------------------
+  //  CÁLCULOS AUTOMÁTICOS
+  // ----------------------------
+  useEffect(() => {
+    const { kilos, cajas, precio_kilo } = compra;
+    if (kilos && precio_kilo) {
+      const costoPescado = parseFloat(kilos) * parseFloat(precio_kilo);
+      const costoEnvases = parseFloat(cajas) * PRECIO_CAJA;
+      const totalFinal = costoPescado + costoEnvases;
+      guardarCompra((prev) => ({
+        ...prev,
+        total_pescado: costoPescado.toFixed(2),
+        total_cajas: costoEnvases.toFixed(2),
+        gran_total: totalFinal.toFixed(2),
+      }));
+    }
+  }, [compra.kilos, compra.cajas, compra.precio_kilo]);
+
+  // ----------------------------
+  //  BUSCAR CLIENTE POR CORREO (BOTÓN)
+  // ----------------------------
+  const buscarCliente = async () => {
+    if (!correoBusqueda) {
+      Swal.fire({
+        icon: "warning",
+        title: "Correo requerido",
+        text: "Escribe un correo para buscar.",
+        confirmButtonColor: "var(--oro-principal)",
+      });
+      return;
+    }
+
+    try {
+      const res = await clienteAxios.get(
+        `/api/comprador/consulta/${correoBusqueda}`
+      );
+      // backend: debe devolver [] o comprador en array
+      const data = res.data;
+      if (!data || (Array.isArray(data) && data.length === 0)) {
+        setClienteEncontrado(false);
+        setDatosCliente(null);
+        // rellenar correo en compra para cuando se cree
+        guardarCompra((prev) => ({ ...prev, correo: correoBusqueda }));
+        return;
+      }
+
+      // si devolvió un array con comprador
+      const found = Array.isArray(data) ? data[0] : data;
+      setClienteEncontrado(true);
+      setDatosCliente(found);
+
+      // autocompletar fields y bloquear/usar para crear compra
+      guardarCompra((prev) => ({
+        ...prev,
+        nombre_cliente: found.nombre,
+        apellido_paterno: found.apellido_paterno,
+        apellido_materno: found.apellido_materno || "",
+        direccion: found.direccion || "",
+        correo: found.correo,
+      }));
+      Swal.fire({
+        icon: "success",
+        title: "Cliente encontrado",
+        text: `Bienvenido ${found.nombre}`,
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error("Error al buscar comprador:", err);
+      // si 404 o error, asumimos no existe
+      setClienteEncontrado(false);
+      setDatosCliente(null);
+      guardarCompra((prev) => ({ ...prev, correo: correoBusqueda }));
+    }
+  };
+
+  // ----------------------------
+  //  PROCESAR VENTA: si cliente existe -> crear compra con codigo_cpr; si no existe -> crear comprador primero
+  // ----------------------------
+  const procesarVenta = async (e) => {
+    e.preventDefault();
+
+    if (!compra.id_lote) {
+      Swal.fire({
+        icon: "error",
+        title: "Seleccione lote",
+        text: "Debes seleccionar un lote antes de continuar.",
+        confirmButtonColor: "var(--oro-principal)",
+      });
+      return;
+    }
+
+    try {
+      let compradorId = null;
+
+      if (clienteEncontrado === true && datosCliente && datosCliente._id) {
+        // comprador ya existe
+        compradorId = datosCliente._id;
+      } else {
+        // Cliente nuevo -> validar campos
+        if (
+          !compra.nombre_cliente ||
+          !compra.apellido_paterno ||
+          !compra.direccion
+        ) {
+          Swal.fire({
+            icon: "error",
+            title: "Faltan Datos",
+            text: "Complete los datos del cliente.",
+            confirmButtonColor: "var(--oro-principal)",
+          });
+          return;
+        }
+
+        // Crear comprador en backend
+        const nuevo = {
+          nombre: compra.nombre_cliente,
+          apellido_paterno: compra.apellido_paterno,
+          apellido_materno: compra.apellido_materno,
+          direccion: compra.direccion,
+          correo: compra.correo || correoBusqueda,
+        };
+
+        const resCrear = await clienteAxios.post(
+          "/api/comprador/registrar",
+          nuevo
+        );
+        // tu controlador responde { mensaje: "Se creó el comprador", data: compradores }
+        compradorId = resCrear.data?.data?._id || resCrear.data?.data;
+      }
+
+      // Crear compra en backend
+      const payloadCompra = {
+        codigo_cpr: compradorId,
+        id_lte: compra.id_lote,
+        precio_kilo_final: compra.precio_kilo,
+        precio_total: compra.gran_total,
+      };
+
+      const resCompra = await clienteAxios.post(
+        "/api/compra/registrar",
+        payloadCompra
+      );
+
+      Swal.fire({
+        title: "Venta registrada",
+        text: `Total: $${compra.gran_total}`,
+        icon: "success",
+        confirmButtonColor: "var(--oro-principal)",
+        background: "#042B35",
+        color: "#F0F0F0",
+      });
+
+      // redirigir a ReciboVenta manteniendo datos (igual que en tu ReciboVenta)
+      const folioGenerado = `V-${Math.floor(Math.random() * 100000)}`;
+      navigate(`/compras/recibo/${folioGenerado}`, {
+        state: {
+          folio: folioGenerado,
+          datosVenta: compra,
+        },
+      });
+    } catch (error) {
+      console.error("Error procesando venta:", error);
+      const mensaje =
+        error.response?.data?.mensaje || "Error al procesar la venta";
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: mensaje,
+        confirmButtonColor: "var(--oro-principal)",
+      });
+    }
+  };
 
   return (
     <div
@@ -297,13 +394,13 @@ const CompraPescadoBlanco = () => {
                   Seleccione su Producto
                 </h1>
                 <p className="lead text-white-50 fs-4">
-                  Calidad premium en pescado blanco de temporada.
+                  Explore nuestro inventario fresco disponible para comenzar la
+                  venta del día.
                 </p>
               </div>
             )}
           </div>
-
-          {/* COLUMNA DERECHA */}
+          {/* COLUMNA DERECHA: FORMULARIO COMPLETO */}
           <div className="col-lg-6 animate__animated animate__fadeInRight">
             <div
               className="card-premium shadow-lg border-gold"
@@ -326,122 +423,182 @@ const CompraPescadoBlanco = () => {
                       onChange={seleccionarLote}
                       required
                     >
-                      <option value="">-- Seleccionar Blanco --</option>
+                      <option value="">-- Catálogo de Mariscos --</option>
                       {inventario.map((lote) => (
                         <option key={lote._id} value={lote._id}>
-                          {lote.especie} - {lote.tipo} | ${lote.precio}/kg
+                          {lote.especie} - {lote.tipo} | {lote.disponible}kg
+                          disp.
                         </option>
                       ))}
                     </select>
                   </div>
-
-                  {/* DATOS DEL CLIENTE (Solo visible si hay producto) */}
+                  {/* PASO 2: VERIFICAR COMPRADOR (Solo si hay lote seleccionado) */}
                   {compra.id_lote && (
                     <div className="animate__animated animate__fadeIn">
-                      <h5
-                        className="text-gold mb-4 border-bottom border-secondary pb-2"
-                        style={{ fontFamily: "'Cinzel', serif" }}
-                      >
-                        Datos del Cliente
-                      </h5>
-
-                      <div className="mb-3">
-                        <label className="form-label text-white-50 small text-uppercase">
-                          Nombre
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control bg-transparent text-white border-secondary"
-                          name="nombre_cliente"
-                          onChange={actualizarState}
-                          required
-                        />
-                      </div>
-
-                      <div className="row mb-3">
-                        <div className="col-6">
-                          <label className="form-label text-white-50 small text-uppercase">
-                            Ap. Paterno
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control bg-transparent text-white border-secondary"
-                            name="apellido_paterno"
-                            onChange={actualizarState}
-                            required
-                          />
-                        </div>
-                        <div className="col-6">
-                          <label className="form-label text-white-50 small text-uppercase">
-                            Ap. Materno
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control bg-transparent text-white border-secondary"
-                            name="apellido_materno"
-                            onChange={actualizarState}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="mb-3">
-                        <label className="form-label text-white-50 small text-uppercase">
-                          Dirección
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control bg-transparent text-white border-secondary"
-                          name="direccion"
-                          onChange={actualizarState}
-                          required
-                        />
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="form-label text-white-50 small text-uppercase">
-                          Correo
-                        </label>
+                      <label className="form-label text-gold fw-bold text-uppercase small mb-2">
+                        2. Identificar Cliente
+                      </label>
+                      <div className="input-group mb-4">
                         <input
                           type="email"
                           className="form-control bg-transparent text-white border-secondary"
-                          name="correo"
-                          onChange={actualizarState}
+                          placeholder="correo@cliente.com"
+                          value={correoBusqueda}
+                          onChange={(e) => setCorreoBusqueda(e.target.value)}
                         />
-                      </div>
+                        <button
+                          className="btn btn-outline-warning"
+                          type="button"
+                          onClick={buscarCliente}
+                        >
+                          <i className="fas fa-search me-2"></i> Verificar
+                        </button>
 
-                      <div
-                        className="p-4 rounded mb-4"
-                        style={{
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid var(--oro-oscuro)",
-                        }}
-                      >
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="text-gold fw-bold fs-5">
-                            TOTAL A PAGAR
-                          </span>
-                          <span
-                            className="display-5 fw-bold text-white"
-                            style={{
-                              textShadow: "0 0 15px rgba(212, 175, 55, 0.5)",
+                        {/* Botón para resetear búsqueda si te equivocaste */}
+                        {clienteEncontrado !== null && (
+                          <button
+                            className="btn btn-outline-secondary"
+                            type="button"
+                            onClick={() => {
+                              setClienteEncontrado(null);
+                              setDatosCliente(null);
+                              setCorreoBusqueda("");
+                              guardarCompra({
+                                ...compra,
+                                nombre_cliente: "",
+                                direccion: "",
+                              });
                             }}
                           >
-                            ${compra.gran_total}
-                          </span>
-                        </div>
-                        <div className="text-end text-white-50 small mt-1">
-                          Incluye costo de {compra.cajas} cajas
-                        </div>
+                            <i className="fas fa-times"></i>
+                          </button>
+                        )}
                       </div>
+                      {/* PASO 3: FORMULARIO CONDICIONAL */}
+                      {clienteEncontrado === true && (
+                        <div className="alert alert-success bg-transparent border-success text-success small">
+                          <i className="fas fa-check-circle me-2"></i> Cliente
+                          registrado. Confirme la venta o edite datos si es
+                          necesario.
+                        </div>
+                      )}
+                      {clienteEncontrado === false && (
+                        <div className="alert alert-info bg-transparent border-info text-info small">
+                          <i className="fas fa-info-circle me-2"></i> Cliente
+                          nuevo. Complete el registro.
+                        </div>
+                      )}
 
-                      <button
-                        type="submit"
-                        className="btn-premium w-100 py-4 fs-4 fw-bold shadow-lg d-flex justify-content-between align-items-center px-5"
-                      >
-                        <span>CONFIRMAR COMPRA</span>
-                        <i className="fas fa-arrow-right"></i>
-                      </button>
+                      {/* FORMULARIO (solo cuando NO existe) */}
+                      {clienteEncontrado === false && (
+                        <div className="animate__animated animate__fadeIn">
+                          <h5
+                            className="text-gold mb-4 border-bottom border-secondary pb-2"
+                            style={{ fontFamily: "'Cinzel', serif" }}
+                          >
+                            Datos del Cliente
+                          </h5>
+
+                          <div className="mb-3">
+                            <label className="form-label text-white-50 small text-uppercase">
+                              Nombre
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control bg-transparent text-white border-secondary"
+                              name="nombre_cliente"
+                              onChange={actualizarState}
+                              required
+                            />
+                          </div>
+
+                          <div className="row mb-3">
+                            <div className="col-6">
+                              <label className="form-label text-white-50 small text-uppercase">
+                                Ap. Paterno
+                              </label>
+                              <input
+                                type="text"
+                                className="form-control bg-transparent text-white border-secondary"
+                                name="apellido_paterno"
+                                onChange={actualizarState}
+                                required
+                              />
+                            </div>
+                            <div className="col-6">
+                              <label className="form-label text-white-50 small text-uppercase">
+                                Ap. Materno
+                              </label>
+                              <input
+                                type="text"
+                                className="form-control bg-transparent text-white border-secondary"
+                                name="apellido_materno"
+                                onChange={actualizarState}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="mb-3">
+                            <label className="form-label text-white-50 small text-uppercase">
+                              Dirección
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control bg-transparent text-white border-secondary"
+                              name="direccion"
+                              onChange={actualizarState}
+                              required
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {/* PASO 4: CAMPOS DE COMPRA (si ya se buscó) */}
+                      {clienteEncontrado !== null && (
+                        <>
+                          <div className="mb-3 mt-4">
+                            <label className="form-label text-white-50 small text-uppercase">
+                              Kilos
+                            </label>
+                            <input
+                              type="number"
+                              className="form-control bg-transparent text-white border-secondary"
+                              name="kilos"
+                              value={compra.kilos}
+                              onChange={actualizarState}
+                              required
+                            />
+                          </div>
+
+                          <div className="mb-3">
+                            <label className="form-label text-white-50 small text-uppercase">
+                              Cajas
+                            </label>
+                            <input
+                              type="number"
+                              className="form-control bg-transparent text-white border-secondary"
+                              name="cajas"
+                              value={compra.cajas}
+                              onChange={actualizarState}
+                              required
+                            />
+                          </div>
+                        </>
+                      )}
+                      {/* BOTÓN */}
+                      {clienteEncontrado !== null && (
+                        <div className="mt-3"></div>
+                      )}
                     </div>
+                  )}
+                  {/* BOTÓN FINAL */}
+                  {compra.id_lote && clienteEncontrado !== null && (
+                    <button
+                      type="submit"
+                      className="btn-premium w-100 py-4 fs-4 fw-bold shadow-lg d-flex justify-content-between align-items-center px-5"
+                    >
+                      <span>CONFIRMAR COMPRA</span>
+                      <i className="fas fa-arrow-right"></i>
+                    </button>
                   )}
                 </form>
               </div>
