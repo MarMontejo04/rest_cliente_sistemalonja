@@ -181,7 +181,7 @@ const CompraPescadoBlanco = () => {
         confirmButtonColor: "var(--oro-principal)",
       }).then(() => {
         // Redirigir y pasar el correo para precargar el formulario
-        navigate(`/clientes/registrar`, { state: { correo: correoBusqueda } });
+        navigate(`/cliente/crearCliente`, { state: { correo: correoBusqueda } });
       });
     }
   };
