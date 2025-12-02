@@ -55,16 +55,23 @@ const Header = () => {
                                 <li className="nav-item">
                                     <Link to="/compras/reporte" className="nav-link text-gold fw-bold">Ventas del Día</Link>
                                 </li>
-
+                                
                                 {/* EXCLUSIVO ADMIN */}
-                                {rol === 'admin' && (
-                                    <li className="nav-item">
-                                        <Link to="/Vendedores" className="nav-link text-info fw-bold">
-                                            <i className="fas fa-users-cog me-1"></i> Gestionar Vendedores
-                                        </Link>
-                                    </li>
-                                )}
-
+                    {rol === 'admin' && (
+                        <>
+                           <li className="nav-item">
+                                <Link to="/Vendedores" className="nav-link text-info fw-bold">
+                                    <i className="fas fa-users-cog me-1"></i> Gestionar Vendedores
+                                </Link>
+                           </li>
+        
+                            <li className="nav-item">
+                                <Link to="/nuevoVendedor" className="nav-link text-gold fw-bold">
+                                    <i className="fas fa-user-plus me-1"></i> Nuevo Vendedor
+                                </Link>
+                            </li>
+                        </>
+                        )}
                                 <li className="nav-item ms-lg-3 mt-3 mt-lg-0">
                                     <button 
                                         onClick={cerrarSesion} 
@@ -76,9 +83,7 @@ const Header = () => {
                             </>
                         ) : (
                             <>
-                                <li className="nav-item">
-                                    <Link to="/nuevoVendedor" className="nav-link text-gold fw-bold">Nuevo Vendedor</Link>
-                                </li>
+
                                 <li className="nav-item ms-lg-3 mt-3 mt-lg-0">
                                     <Link to="/login" className="btn btn-symbol-primary">
                                         <i className="fas fa-user-circle me-2"></i> Ingresar
