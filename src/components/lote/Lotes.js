@@ -215,16 +215,6 @@ const Lotes = () => {
 
                       <td className="text-end py-4 pe-5">
                         <div className="d-flex justify-content-end gap-2">
-                          {lote.kilos > 0 && (
-                            <Link
-                              to="/compras/nueva"
-                              className="btn btn-sm btn-outline-light px-3 d-flex align-items-center gap-2"
-                              style={{ borderColor: "rgba(255,255,255,0.3)" }}
-                            >
-                              <i className="fas fa-shopping-cart small"></i>{" "}
-                              Vender
-                            </Link>
-                          )}
                           <Link
                             to={`/lotes/editar/${lote._id}`}
                             className="btn btn-sm btn-outline-warning px-3 d-flex align-items-center gap-2"
