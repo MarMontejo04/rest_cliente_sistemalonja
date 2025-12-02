@@ -375,6 +375,7 @@ const CompraMarisco = () => {
                                                             value={compra.kilos}
                                                             onChange={actualizarState}
                                                             required
+                                                            readOnly
                                                         />
                                                     </div>
 
