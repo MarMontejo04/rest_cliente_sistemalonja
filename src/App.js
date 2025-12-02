@@ -8,6 +8,10 @@ import Inicio from "./components/inicio/Inicio";
 
 import Login from "./components/auth/Login";
 
+import EditarVendedor from "./components/vendedor/EditarVendedores.js";
+import Vendedores from "./components/vendedor/Vendedores.js";
+
+
 import Lotes from "./components/lote/Lotes";
 import NuevoLote from "./components/lote/NuevoLote";
 import EditarLote from "./components/lote/EditarLote.js";
@@ -33,7 +37,8 @@ function App() {
 
                 <Route path="/login" element={<Login />} />
                 <Route path="/nuevoVendedor" element={<NuevoVendedor />} />
-
+                <Route path="/Vendedores" element={<Vendedores />} />
+                <Route path="/vendedores/editar/:id" element={<EditarVendedor />} />
 
                 <Route path="/lotes" element={<Lotes />} />
                 <Route path='/lotes/nuevo' element={<NuevoLote />} />
