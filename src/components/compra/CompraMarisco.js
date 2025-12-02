@@ -50,14 +50,39 @@ const CompraMarisco = () => {
 
     const actualizarState = e => { guardarCompra({ ...compra, [e.target.name]: e.target.value }); }
 
-    const procesarVenta = e => {
+const procesarVenta = e => {
         e.preventDefault();
+
         if(!compra.nombre_cliente || !compra.apellido_paterno || !compra.direccion || !compra.id_lote) {
-             Swal.fire({ icon: 'error', title: 'Faltan Datos', text: 'Complete los datos del cliente.', confirmButtonColor: 'var(--oro-principal)', background: '#042B35', color: '#F0F0F0' });
+             Swal.fire({ 
+                icon: 'error', 
+                title: 'Faltan Datos', 
+                text: 'Por favor selecciona un lote y completa los datos del cliente.', 
+                confirmButtonColor: 'var(--oro-principal)', 
+                background: '#042B35', 
+                color: '#F0F0F0' 
+            });
             return;
         }
-        Swal.fire({ title: 'Venta Exitosa', text: `Total: $${compra.gran_total}`, icon: 'success', confirmButtonColor: 'var(--oro-principal)', background: '#042B35', color: '#F0F0F0' })
-        .then(() => { navigate('/compras/recibo/V-MARISCO'); });
+
+        Swal.fire({ 
+            title: 'Venta Exitosa', 
+            text: `Total a cobrar: $${compra.gran_total}`, 
+            icon: 'success', 
+            confirmButtonColor: 'var(--oro-principal)', 
+            background: '#042B35', 
+            color: '#F0F0F0' 
+        })
+        .then(() => { 
+            const folioGenerado = `V-${Math.floor(Math.random() * 10000)}`;
+
+            navigate(`/compras/recibo/${folioGenerado}`, { 
+                state: { 
+                    datosVenta: compra, // Pasamos todos los datos del formulario
+                    folio: folioGenerado
+                } 
+            }); 
+        });
     }
 
     return (
