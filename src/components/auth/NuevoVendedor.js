@@ -37,7 +37,6 @@ const NuevoVendedor = () => {
         }
 
         try {
-            // Petición al Backend
             const res = await clienteAxios.post('/api/auth/registrar', vendedor);
 
             Swal.fire({
@@ -48,7 +47,7 @@ const NuevoVendedor = () => {
                 background: '#042B35',
                 color: '#F0F0F0'
             }).then(() => {
-                navigate('/lotes'); // Volver al panel principal o a donde prefieras
+                navigate('/lotes'); 
             });
         } catch (error) {
             console.log(error);
