@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 import clienteAxios from "../../config/axios.js";
 
 const Lotes = () => {
@@ -22,6 +23,56 @@ const Lotes = () => {
 
     obtenerLotes();
   }, []);
+
+  const eliminarLote = (idLote) => {
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción desactivará el Lote y la Especie asociada.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, desactivar",
+      cancelButtonText: "Cancelar",
+      background: "#042B35",
+      color: "#F0F0F0",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const respuesta = await clienteAxios.delete(
+            `/api/lote-especie/eliminar/${idLote}`
+          );
+
+          const nuevosLotes = lotes.filter((l) => l._id !== idLote);
+          setLotes(nuevosLotes);
+
+          Swal.fire({
+            title: "¡Desactivado!",
+            text:
+              respuesta.data.mensaje ||
+              "El lote ha sido desactivado (Soft Delete).",
+            icon: "success",
+            confirmButtonColor: "var(--oro-principal)",
+            background: "#042B35",
+            color: "#F0F0F0",
+          });
+        } catch (error) {
+          const msg =
+            error.response?.data?.mensaje ||
+            "Error al conectar con el servidor.";
+
+          Swal.fire({
+            title: "Error de Eliminación",
+            text: msg,
+            icon: "error",
+            confirmButtonColor: "var(--oro-principal)",
+            background: "#042B35",
+            color: "#F0F0F0",
+          });
+        }
+      }
+    });
+  };
 
   if (loading) {
     return <h3 className="text-center text-white py-5">Cargando lotes...</h3>;
@@ -174,7 +225,6 @@ const Lotes = () => {
                               Vender
                             </Link>
                           )}
-
                           <Link
                             to={`/lotes/editar/${lote._id}`}
                             className="btn btn-sm btn-outline-warning px-3 d-flex align-items-center gap-2"
@@ -185,8 +235,8 @@ const Lotes = () => {
                           >
                             <i className="fas fa-edit small"></i> Editar
                           </Link>
-
                           <button
+                            onClick={() => eliminarLote(lote._id)}                        
                             className="btn btn-sm btn-outline-danger px-3 d-flex align-items-center gap-2"
                             style={{ borderColor: "rgba(220, 53, 69, 0.5)" }}
                           >
