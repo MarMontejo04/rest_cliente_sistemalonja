@@ -83,6 +83,14 @@ const Header = () => {
                             </button>
                             
                             <ul className="dropdown-menu shadow-lg border-0 mt-2" style={dropdownStyle}>
+                                
+                                <li>
+                                    <Link to="/crearCliente" className="dropdown-item hover-gold" style={itemStyle}>
+                                        <i className="fas fa-user-circle me-2"></i> REGISTRATE
+                                    </Link>
+                                </li>
+                                <li><hr className="dropdown-divider bg-secondary opacity-25 my-2" /></li>
+
                                 <li>
                                     <Link to="/compras/azul" className="dropdown-item hover-gold" style={itemStyle}>
                                         <i className="fas fa-water me-3 text-info fa-lg"></i> Pescado Azul
