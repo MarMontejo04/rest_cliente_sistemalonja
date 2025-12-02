@@ -178,7 +178,7 @@ const CompraMarisco = () => {
         confirmButtonColor: "var(--oro-principal)",
       }).then(() => {
         // Redirigir y pasar el correo para precargar el formulario
-        navigate(`/cliente/crearCliente`, { state: { correo: correoBusqueda } });
+        navigate(`/crearCliente`, { state: { correo: correoBusqueda } });
       });
     }
   };
