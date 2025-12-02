@@ -140,7 +140,7 @@ const CompraPescadoAzul = () => {
     // Asumiremos que envías todo junto o que usas el código hardcodeado como tenías.
     
     const payload = {
-      codigo_cpr: '691ea276ba79be1daaf7cb39', // Tu ID hardcodeado de prueba (cuidado con esto en prod)
+      codigo_cpr: compra.codigo_cpr, // Tu ID hardcodeado de prueba (cuidado con esto en prod)
       id_lte: compra.id_lote,
       precio_kilo_final,
       precio_total,
